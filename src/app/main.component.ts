@@ -8,44 +8,86 @@ import {FilterCondition} from './FilterCondition';
   selector: 'app-main',
   template: `
     <div id="card_set_filter">
-      <label>Card Set:</label><br>
-      <select id="card_set_selection">
-        <option value="" selected disabled hidden>Choose card set here</option>
-        <option *ngFor="let packName of packList" value="{{packName}}">
-          <!--[class.selected]="set === selectedSet"-->
-          <!--(click)="onSelect(set)">-->{{packName}}
-        </option>
-      </select>
       <div class="row">
-        <fieldset id="fieldset_rarity">
-          <legend>Rarity</legend>
-          <input type="checkbox" id="rarity_free" value="Free">Free<br>
-          <input type="checkbox" id="rarity_common" value="Common">Common<br>
-          <input type="checkbox" id="rarity_rare" value="Rare">Rare<br>
-          <input type="checkbox" id="rarity_epic" value="Epic">Epic<br>
-          <input type="checkbox" id="rarity_legendary" value="Legendary">Legendary<br>
-        </fieldset>
-        <fieldset id="fieldset_class">
-          <legend>Class</legend>
-          <!--<input type="checkbox" id="class_Neutral" value="Neutral">Neutral<br>-->
-          <!--<input type="checkbox" id="class_Druid" value="Druid">Druid<br>-->
-          <!--<input type="checkbox" id="class_Hunter" value="Hunter">Hunter<br>-->
-          <!--<input type="checkbox" id="class_Mage" value="Mage">Mage<br>-->
-          <!--<input type="checkbox" id="class_Paladin" value="Paladin">Paladin<br>-->
-          <!--<input type="checkbox" id="class_Priest" value="Priest">Priest<br>-->
-          <!--<input type="checkbox" id="class_Rogue" value="Rogue">Rogue<br>-->
-          <!--<input type="checkbox" id="class_Shaman" value="Shaman">Shaman<br>-->
-          <!--<input type="checkbox" id="class_Warlock" value="Warlock">Warlock<br>-->
-          <!--<input type="checkbox" id="class_Warrior" value="Warrior">Warrior<br>-->
-          <div *ngFor='let cls of classList'>
-            <input type='checkbox' id='class_{{cls}}' value='{{cls}}'>{{cls}}<br>
+
+        <div class="col-md-4">
+
+          <label>Card Set:</label><br>
+          <select id="card_set_selection">
+            <option value="ALL" selected disabled hidden>Choose card set here</option>
+            <option value="ALL">All Cards</option>
+            <option value="STANDARD">Standard Cards</option>
+            <option *ngFor="let packName of packList" value="{{packName}}">
+              <!--[class.selected]="set === selectedSet"-->
+              <!--(click)="onSelect(set)">-->{{packName}}
+            </option>
+          </select>
+
+          <div>
+            <select>
+              <option>Add a filter...</option>
+              <optgroup label="Stats">
+                <option value="Attack">Attack</option>
+                <option value="Health">Health</option>
+                <option value="Cost">Cost</option>
+              </optgroup>
+
+              <optgroup label="Mechanics">
+                <option *ngFor="let mechanic of mechanicList" value="{{mechanic}}">{{mechanic}}</option>
+              </optgroup>
+
+            </select>
+          </div>
+          <button (click)="filtering()">Filter</button>
+
+        </div>
+
+        <div class="col-md-3">
+        </div>
+
+        <div class="col-md-5">
+          <div class="row" id="filter_row">
+            <div>
+              <legend>Race</legend>
+              <fieldset id="fieldset_race">
+
+                <div *ngFor="let race of raceList">
+                  <input type="checkbox" id="race_{{race}}" value="{{race}}">{{race}}<br>
+                </div>
+
+              </fieldset>
+            </div>
+            <div>
+
+              <legend>Rarity</legend>
+
+              <fieldset id="fieldset_rarity">
+                <input type="checkbox" id="rarity_free" value="Free">Free<br>
+                <input type="checkbox" id="rarity_common" value="Common">Common<br>
+                <input type="checkbox" id="rarity_rare" value="Rare">Rare<br>
+                <input type="checkbox" id="rarity_epic" value="Epic">Epic<br>
+                <input type="checkbox" id="rarity_legendary" value="Legendary">Legendary<br>
+              </fieldset>
+            </div>
+            <div>
+
+              <legend>Class</legend>
+              <fieldset id="fieldset_class">
+
+                <div *ngFor='let cls of classList'>
+                  <input type='checkbox' id='class_{{cls}}' value='{{cls}}'>{{cls}}<br>
+                </div>
+
+              </fieldset>
+            </div>
+
           </div>
 
-        </fieldset>
+        </div>
       </div>
+
+
     </div>
-    <h1>this is main comp</h1>
-    <button (click)="filtering()">Filter</button>
 
     <!--<div class="row">-->
     <!--<div class="col-sm-3">item1</div>-->
@@ -53,7 +95,7 @@ import {FilterCondition} from './FilterCondition';
     <!--<div class="col-sm-3">item3</div>-->
     <!--<div class="col-sm-3">item4</div>-->
     <!--</div>-->
-    <div *ngIf="cardsJSON">
+    <div *ngIf="cardsJSON" id="displayPanel">
       <div *ngFor="let card of cards | cardFilter:conditions | paginate: { itemsPerPage: 15, currentPage: p } let index =index;
     let isOdd=odd; let isEven=even" class="row entry-row" [class.odd]="isOdd" [class.even]="isEven" class="row">
         <div *ngIf='card.img' class="col-sm-4">
@@ -125,12 +167,17 @@ import {FilterCondition} from './FilterCondition';
 })
 
 export class MainComponent implements OnInit {
-  p: number = 1;
+  p = 1;
   packList: string[] = ['Basic', 'Classic', 'Naxxramas', 'Goblins vs Gnomes', 'Blackrock Mountain'
     , 'The Grand Tournament', 'The League of Explorers', 'Whispers of the Old Gods', 'One Night in Karazhan'
     , 'Mean Streets of Gadgetzan', 'Journey to Un\'Goro', 'Knights of the Frozen Throne'];
+  standardPackList: string[] = ['Basic', 'Classic', 'Whispers of the Old Gods', 'One Night in Karazhan'
+    , 'Mean Streets of Gadgetzan', 'Journey to Un\'Goro', 'Knights of the Frozen Throne'];
   classList = ['Neutral', 'Druid', 'Hunter', 'Mage', 'Paladin', 'Priest', 'Rogue', 'Shaman', 'Warlock', 'Warrior'];
-
+  raceList = ['Beast', 'Demon', 'Dragon', 'Elemental', 'Mech', 'Murloc', 'Pirate', 'Totem'];
+  mechanicList = ['Adapt', 'BattleCry', 'Charge', 'Choose One', 'Combo', 'Deathrattle', 'Discover', 'Divine Shield', 'Enrage'
+    , 'Freeze', 'Immune', 'Inspire', 'Lifesteal', 'Overload', 'Quest', 'Secret', 'Silence', 'Spell Damage', 'Stealth', 'Taunt'
+    , 'Transform', 'Windfury'];
   // the packlist is hard coded, due to the fact that the JSON from api call is flawed
   all_cards: Card[] = [];
   cards: Card[] = [];
@@ -147,6 +194,7 @@ export class MainComponent implements OnInit {
   setChosen: string[] = [];
   classChosen: string[] = [];
   rarityChosen: string[] = [];
+  raceChosen: string[] = [];
 
   constructor(private cardService: CardService) {
   }
@@ -165,7 +213,6 @@ export class MainComponent implements OnInit {
       this.conditions = new FilterCondition();
 
 
-
       // for (var i = 0; i < this.count; i++) {
       //     this.cards.push(new Card(this.cardsJSON[i].cardId, this.cardsJSON[i].name, this.cardsJSON[i].cardSet
       //       , this.cardsJSON[i].type, this.cardsJSON[i].playerClass, this.cardsJSON[i].rarity
@@ -175,9 +222,9 @@ export class MainComponent implements OnInit {
       //   }
       // });
 
-      for (var i = 0; i < this.packList.length; i++) {
+      for (let i = 0; i < this.packList.length; i++) {
         // if (Object.keys(this.cardsJSON[this.packList[i]]).length !== 0) {
-        for (var j = 0; j < Object.keys(this.cardsJSON[this.packList[i]]).length; j++) {
+        for (let j = 0; j < Object.keys(this.cardsJSON[this.packList[i]]).length; j++) {
           this.all_cards.push(new Card(this.cardsJSON[this.packList[i]][j].cardId
             , this.cardsJSON[this.packList[i]][j].name, this.cardsJSON[this.packList[i]][j].cardSet
             , this.cardsJSON[this.packList[i]][j].type, this.cardsJSON[this.packList[i]][j].playerClass
@@ -186,12 +233,13 @@ export class MainComponent implements OnInit {
             , this.cardsJSON[this.packList[i]][j].text, this.cardsJSON[this.packList[i]][j].artist
             , this.cardsJSON[this.packList[i]][j].collectible, this.cardsJSON[this.packList[i]][j].img
             , this.cardsJSON[this.packList[i]][j].imgGold, this.cardsJSON[this.packList[i]][j].locale
-            , this.cardsJSON[this.packList[i]][j].flavor));
+            , this.cardsJSON[this.packList[i]][j].flavor, this.cardsJSON[this.packList[i]][j].attack
+            , this.cardsJSON[this.packList[i]][j].health));
         }
         // }
       }
 
-      for (let card of this.all_cards) {
+      for (const card of this.all_cards) {
         if (card.collectible === true) {
           this.cards.push(card);
         }
@@ -208,21 +256,16 @@ export class MainComponent implements OnInit {
     this.tmp_conditions = new FilterCondition();
     this.conditions = new FilterCondition();
 
-    if ((<HTMLInputElement>document.getElementById('card_set_selection')).value) {
-      this.setChosen.push((<HTMLInputElement>document.getElementById('card_set_selection')).value);
-    }
-    if (this.setChosen.length !== 0) {
-      this.tmp_conditions.setSetChosen(this.setChosen);
-    }
-
 
     this.getChosenRarity();
     this.getChosenClass();
-
+    this.getChosenRace();
+    this.getChosenSet();
 
     this.conditions.setClassChosen(this.tmp_conditions.getClassChosen());
     this.conditions.setRarityChosen(this.tmp_conditions.getRarityChosen());
     this.conditions.setSetChosen(this.tmp_conditions.getSetChosen());
+    this.conditions.setRaceChosen(this.tmp_conditions.getRaceChosen());
     this.tmp_conditions = new FilterCondition();
     // ******The conditions object has to be re-referenced, so that the pipe will recoginze the changes,
     //  therefore the temp condition object is created, and cleared every time it changes **************
@@ -231,12 +274,37 @@ export class MainComponent implements OnInit {
     this.setChosen = [];
     this.rarityChosen = [];
     this.classChosen = [];
-
+    this.raceChosen = [];
   }
+
+
+  getChosenSet(): void {
+    switch ((<HTMLInputElement>document.getElementById('card_set_selection')).value) {
+      case 'ALL': {
+        this.setChosen = this.packList;
+        break;
+      }
+      case 'STANDARD': {
+        this.setChosen = this.standardPackList;
+        break;
+      }
+      default: {
+        this.setChosen.push((<HTMLInputElement>document.getElementById('card_set_selection')).value);
+        break;
+      }
+    }
+
+    if (this.setChosen.length !== 0) {
+      this.tmp_conditions.setSetChosen(this.setChosen);
+
+    }
+  }
+
 
   getChosenRarity(): void {
 
-    if ((<HTMLInputElement>document.getElementById('rarity_free')).checked) {
+    if ((<HTMLInputElement>document.getElementById('rarity_free')).checked
+    ) {
       this.rarityChosen.push((<HTMLInputElement>document.getElementById('rarity_free')).value);
     }
     if ((<HTMLInputElement>document.getElementById('rarity_common')).checked) {
@@ -258,44 +326,12 @@ export class MainComponent implements OnInit {
 
 
   }
-  // TODO: clean this method up later
 
-
-  // getChosenClass(): void {
-  //   if ((<HTMLInputElement>document.getElementById('class_Neutral')).checked) {
-  //     this.classChosen.push((<HTMLInputElement>document.getElementById('class_Neutral')).value);
-  //   }
-  //   if ((<HTMLInputElement>document.getElementById('class_Druid')).checked) {
-  //     this.classChosen.push((<HTMLInputElement>document.getElementById('class_Druid')).value);
-  //   }
-  //   if ((<HTMLInputElement>document.getElementById('class_Hunter')).checked) {
-  //     this.classChosen.push((<HTMLInputElement>document.getElementById('class_Hunter')).value);
-  //   }
-  //   if ((<HTMLInputElement>document.getElementById('class_Mage')).checked) {
-  //     this.classChosen.push((<HTMLInputElement>document.getElementById('class_Mage')).value);
-  //   }
-  //   if ((<HTMLInputElement>document.getElementById('class_Paladin')).checked) {
-  //     this.classChosen.push((<HTMLInputElement>document.getElementById('class_Paladin')).value);
-  //   }
-  //   if ((<HTMLInputElement>document.getElementById('class_Priest')).checked) {
-  //     this.classChosen.push((<HTMLInputElement>document.getElementById('class_Priest')).value);
-  //   }
-  //   if ((<HTMLInputElement>document.getElementById('class_Rogue')).checked) {
-  //     this.classChosen.push((<HTMLInputElement>document.getElementById('class_Rogue')).value);
-  //   }
-  //   if ((<HTMLInputElement>document.getElementById('class_Shaman')).checked) {
-  //     this.classChosen.push((<HTMLInputElement>document.getElementById('class_Shaman')).value);
-  //   }
-  //   if ((<HTMLInputElement>document.getElementById('class_Warlock')).checked) {
-  //     this.classChosen.push((<HTMLInputElement>document.getElementById('class_Warlock')).value);
-  //   }
-  //   if ((<HTMLInputElement>document.getElementById('class_Warrior')).checked) {
-  //     this.classChosen.push((<HTMLInputElement>document.getElementById('class_Warrior')).value);
-  //   }
-  // }
+// TODO: clean this method up later
 
   getChosenClass(): void {
-    for (let cls of this.classList) {
+    for (const cls of this.classList
+      ) {
       if ((<HTMLInputElement>document.getElementById('class_' + cls)).checked) {
         this.classChosen.push((<HTMLInputElement>document.getElementById('class_' + cls)).value);
       }
@@ -306,4 +342,19 @@ export class MainComponent implements OnInit {
     }
 
   }
+
+  getChosenRace(): void {
+    for (const race of this.raceList
+      ) {
+      if ((<HTMLInputElement>document.getElementById('race_' + race)).checked) {
+        this.raceChosen.push((<HTMLInputElement>document.getElementById('race_' + race)).value);
+      }
+    }
+
+    if (this.raceChosen.length !== 0) {
+      this.tmp_conditions.setRaceChosen(this.raceChosen);
+    }
+
+  }
+
 }

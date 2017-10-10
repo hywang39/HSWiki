@@ -25,6 +25,12 @@ export class FilterPipe implements PipeTransform {
       this.cards = this.cards.filter(card => conditions.getClassChosen().includes(card.profession));
 
     }
+
+    if (conditions.getRaceChosen()) {
+      this.cards = this.cards.filter(card => conditions.getRaceChosen().includes(card.race));
+    }
+
+
     return this.cards;
   }
 }

@@ -14,10 +14,12 @@ export class Card {
   locale: string;
   flavor: string;
   race: string;
+  attack: number;
+  health: number;
 
   constructor(id: number, name?: string, card_set?: string, type?: string, profession?: string, race?: string
               , rarity?: string, cost?: number, description?: string, artist?: string, collectible?: boolean
-              , img?: string, img_gold?: string, locale?: string, flavor?: string) {
+              , img?: string, img_gold?: string, locale?: string, flavor?: string, attack?: number, health?: number) {
     this.id = id;
     this.name = name;
     this.card_set = card_set;
@@ -33,6 +35,8 @@ export class Card {
     this.locale = locale;
     this.flavor = flavor;
     this.race = race;
+    this.attack = attack;
+    this.health = health;
   }
 }
 
