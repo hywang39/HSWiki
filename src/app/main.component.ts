@@ -1,8 +1,9 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnInit, Renderer2} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {CardService} from './card.service';
 import {Card} from './card';
 import {FilterCondition} from './FilterCondition';
+import {ElementRef, Renderer} from '@angular/core';
 
 @Component({
   selector: 'app-main',
@@ -10,21 +11,24 @@ import {FilterCondition} from './FilterCondition';
     <div id="card_set_filter">
       <div class="row">
 
-        <div class="col-md-4">
+        <div class="col-md-5" id="filter_div">
+          <div class="container">
+            <label>Card Set:</label><br>
+            <select id="card_set_selection">
+              <option value="ALL" selected disabled hidden>Choose card set here</option>
+              <option value="ALL">All Cards</option>
+              <option value="STANDARD">Standard Cards</option>
+              <option *ngFor="let packName of packList" value="{{packName}}">
+                <!--[class.selected]="set === selectedSet"-->
+                <!--(click)="onSelect(set)">-->{{packName}}
+              </option>
+            </select>
+          </div>
 
-          <label>Card Set:</label><br>
-          <select id="card_set_selection">
-            <option value="ALL" selected disabled hidden>Choose card set here</option>
-            <option value="ALL">All Cards</option>
-            <option value="STANDARD">Standard Cards</option>
-            <option *ngFor="let packName of packList" value="{{packName}}">
-              <!--[class.selected]="set === selectedSet"-->
-              <!--(click)="onSelect(set)">-->{{packName}}
-            </option>
-          </select>
 
-          <div>
-            <select>
+          <div class="container">
+
+            <select (change)='addFilter(this.clickEvent)'>
               <option>Add a filter...</option>
               <optgroup label="Stats">
                 <option value="Attack">Attack</option>
@@ -38,11 +42,9 @@ import {FilterCondition} from './FilterCondition';
 
             </select>
           </div>
-          <button (click)="filtering()">Filter</button>
-
         </div>
 
-        <div class="col-md-3">
+        <div class="col-md-2">
         </div>
 
         <div class="col-md-5">
@@ -86,6 +88,7 @@ import {FilterCondition} from './FilterCondition';
         </div>
       </div>
 
+      <button (click)="filtering()">Filter</button>
 
     </div>
 
@@ -189,6 +192,8 @@ export class MainComponent implements OnInit {
   count: number;
   conditions: FilterCondition;
   tmp_conditions: FilterCondition;
+  clickEvent: boolean = true;
+  filter_counter = 1;
 
 
   setChosen: string[] = [];
@@ -196,11 +201,12 @@ export class MainComponent implements OnInit {
   rarityChosen: string[] = [];
   raceChosen: string[] = [];
 
-  constructor(private cardService: CardService) {
+  constructor(private cardService: CardService, public renderer: Renderer2) {
   }
 
   ngOnInit(): void {
     this.getData();
+
   }
 
   getData(): void {
@@ -357,4 +363,32 @@ export class MainComponent implements OnInit {
 
   }
 
+  addFilter(clickEvent): void {
+    if (clickEvent) {
+      var currentNode = document.getElementById('filter_div').children[this.filter_counter];
+      var newNode = currentNode.cloneNode(true);
+      this.renderer.listen(newNode, 'change', (event) => this.addFilter(true));
+      console.log(currentNode);
+      console.log(newNode);
+      document.getElementById('filter_div').appendChild(newNode);
+
+      var operatorNode = document.createElement('select');
+      var inputNode = document.createElement('input');
+
+      operatorNode.innerHTML = '<option value=">">></option><option value=">=">>=</option><option value="=">=' +
+        '</option><option value="<"><</option><option value="<="><=</option><option value="!=">!=</option>';
+      // (<HTMLInputElement>document.getElementById('filter_div').children[1].children[0]).removeAttribute('onchange()');
+      inputNode.setAttribute('style', 'width:5em');
+
+      currentNode.appendChild(operatorNode);
+      currentNode.appendChild(inputNode);
+      this.filter_counter += 1;
+      // change the currentNode to the active filter selection
+      this.clickEvent = false;
+      this.renderer.listen(currentNode, 'change', (event) => this.addFilter(this.clickEvent));
+      console.log(currentNode);
+    }
+  }
+
 }
+
